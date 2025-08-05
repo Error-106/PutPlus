@@ -53,7 +53,7 @@ public final class PutPlus extends JavaPlugin implements Listener {
     }
 
     /**
-     * 获取Put命令的文本参数构造器
+     * Put命令的文本参数构造器
      *
      * @return 文本参数构造器实例，用于构建Put命令
      */
@@ -147,7 +147,6 @@ public final class PutPlus extends JavaPlugin implements Listener {
         /**
          * 获取建议列表的方法
          *
-         * @param <S>     上下文类型参数
          * @param context 命令上下文
          * @param builder 建议构建器
          * @return 包含建议的CompletableFuture对象
@@ -181,9 +180,7 @@ public final class PutPlus extends JavaPlugin implements Listener {
     }
 
     /**
-     * 内部静态类：用于实现自定义参数类型转换。
-     * <p>
-     * 该类实现了{@link CustomArgumentType.Converted}接口，针对{@link MethodEnum}枚举类型与String类型之间的转换。
+     * MethodArgument 静态内部类：提供自定义参数类型转换的实现。
      *
      * @author Error-106
      * @date 2025/08/05
@@ -193,7 +190,7 @@ public final class PutPlus extends JavaPlugin implements Listener {
         /**
          * 获取原生类型的方法
          *
-         * @return 原生类型对象，此处为字符串类型的_ARGUMENT_TYPE
+         * @return 字符串类型的原生ArgumentType
          */
         @Override
         public @NotNull ArgumentType<String> getNativeType() {
@@ -203,7 +200,6 @@ public final class PutPlus extends JavaPlugin implements Listener {
         /**
          * 获取建议列表的方法
          *
-         * @param <S>     上下文类型参数
          * @param context 命令上下文
          * @param builder 建议构建器
          * @return 包含建议的CompletableFuture对象
@@ -220,10 +216,10 @@ public final class PutPlus extends JavaPlugin implements Listener {
         }
 
         /**
-         * 将原生类型字符串转换为对应的方法枚举类型
+         * 将原生类型字符串转换为位置枚举
          *
          * @param nativeType 原生类型字符串
-         * @return 对应的方法枚举类型
+         * @return 对应的位置枚举值
          * @throws CommandSyntaxException 当转换失败时抛出异常
          */
         @Override

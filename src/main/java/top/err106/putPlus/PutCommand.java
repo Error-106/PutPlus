@@ -22,10 +22,10 @@ public class PutCommand {
      * 执行放置武器操作的方法。
      *
      * @param sender   命令发送者
-     * @param executor 实体执行者
-     * @param method   操作方法，"on" 或 "off"，表示放置或取下武器
-     * @param position 武器位置
-     * @param force    是否强制执行放置操作
+     * @param executor 命令执行者
+     * @param method   操作方法，"on" 或 "off"，表示穿上/替换或取下装备
+     * @param position 目标装备位置
+     * @param force    是否强制执行操作
      * @return 命令执行结果，返回 {@link Command#SINGLE_SUCCESS} 表示执行成功
      */
     public static int runPut(CommandSender sender, Entity executor, String method, String position, boolean force) {
@@ -95,8 +95,8 @@ public class PutCommand {
     /**
      * 获取玩家指定位置装备的方法
      *
-     * @param inv      玩家的装备库存
-     * @param position 指定的装备位置，有效值包括"head", "chest", "legs", "feet"
+     * @param inv      玩家的背包
+     * @param position 指定的装备位置，有效值包括 "head", "chest", "legs", "feet"
      * @return 对应位置的装备物品栈
      * @throws IllegalArgumentException 如果提供的位置无效时抛出的异常
      */
@@ -115,7 +115,7 @@ public class PutCommand {
      *
      * @param inv      玩家背包
      * @param item     要设置的物品堆
-     * @param position 装备部位，有效值包括："head", "chest", "legs", "feet"
+     * @param position 装备部位，有效值包括 "head", "chest", "legs", "feet"
      * @throws IllegalArgumentException 如果提供的部位无效，抛出异常
      */
     private static void setPlayerArms(PlayerInventory inv, ItemStack item, String position) {
