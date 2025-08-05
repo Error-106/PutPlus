@@ -1,0 +1,15 @@
+name: PutPlus
+version: '0.1-SNAPSHOT'
+main: top.err106.putPlus.PutPlus
+api-version: '1.21.4'
+description: '一个好玩的插件'
+authors: [ Err106 , xionglongztz]
+command:
+  puton:
+    description: '插件主命令1'
+    usage: /<command> < head | chest | legs | boots>
+    permission: put.on
+  putoff:
+    description: '插件主命令2'
+    usage: /<command> < head | chest | legs | boots>
+    permission: put.off
