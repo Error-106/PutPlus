@@ -44,11 +44,7 @@ public final class PutPlus extends JavaPlugin implements Listener {
         final LifecycleEventManager<@NotNull Plugin> lifecycleManager = this.getLifecycleManager();
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, Command -> Command.registrar().register(getPutCommand().build()));
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-        console.sendMessage(Component.text("[")
-                .append(Component.text("PutPlus").color(TextColor.color(0x55FF55)))
-                .append(Component.text("] "))
-                .append(Component.text("插件已启用").color(TextColor.color(0x55FF55)))
-        );
+        console.sendRichMessage("[<green>PutPlus</green>] <green>插件已启用</green>");
     }
 
     /**
