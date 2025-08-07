@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -59,10 +58,14 @@ public final class PutPlus extends JavaPlugin implements Listener {
      */
     private static LiteralArgumentBuilder<CommandSourceStack> getPutCommand() {
         return Commands.literal("put")
+                .requires(sender -> sender.getSender().hasPermission("permission.putplus"))
                 .then(Commands.argument("method", new MethodArgument())
+                        .suggests(PutPlus::methodArgumentSuggests)
                         .then(Commands.argument("position", new PositionArgument())
+                                .suggests(PutPlus::positionArgumentSuggests)
                                 .executes(PutPlus::runPutWithCtx)
                                 .then(Commands.literal("force")
+                                        .requires(sender -> sender.getSender().hasPermission("permission.putplus.force"))
                                         .executes(PutPlus::runPutWithCtx)
                                 )
                         )
@@ -70,14 +73,15 @@ public final class PutPlus extends JavaPlugin implements Listener {
     }
 
     /**
-     * 使用命令上下文执行runPut方法。
+     * 使用命令上下文检查权限并执行runPut方法。使用命令上下文检查权限并执行runPut方法。
      *
-     * @param ctx 命令上下文
+     * @param ctx 命令源栈的上下文
      * @return 执行结果
      */
     private static int runPutWithCtx(CommandContext<CommandSourceStack> ctx) {
         String method = ctx.getArgument("method", MethodEnum.class).toString();
         String position = ctx.getArgument("position", PositionEnum.class).toString();
+        if (!ctx.getSource().getSender().hasPermission("permission.putplus." + method + "." + position)) {ctx.getSource().getSender().sendRichMessage("<red>你没有权限");return 0;}
         boolean force;
         try {
             force = ctx.getNodes().getLast().getNode().getName().equals("force");
@@ -85,6 +89,44 @@ public final class PutPlus extends JavaPlugin implements Listener {
             force = false;
         }
         return runPut(ctx.getSource().getSender(), ctx.getSource().getExecutor(), method, position, force);
+    }
+
+    /**
+     * 异步生成methodArgument建议。
+     *
+     * @param ctx     命令上下文
+     * @param builder 建议构建器
+     * @return 包含建议的CompletableFuture对象
+     */
+    private static CompletableFuture<Suggestions> methodArgumentSuggests(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder){
+        return CompletableFuture.supplyAsync(()->{
+            for (MethodEnum method : MethodEnum.values()) {
+                String name = method.toString();
+                if (name.startsWith(builder.getRemainingLowerCase())&&ctx.getSource().getSender().hasPermission("permission.putplus." + method)){
+                    builder.suggest(method.toString());
+                }
+            }
+            return builder.build();
+        });
+    }
+
+    /**
+     * 异步生成positionArgument建议。
+     *
+     * @param ctx     命令上下文
+     * @param builder 建议构建器
+     * @return 包含建议的CompletableFuture对象
+     */
+    private static CompletableFuture<Suggestions> positionArgumentSuggests(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder){
+        return CompletableFuture.supplyAsync(()->{
+            for (PositionEnum position : PositionEnum.values()) {
+                String name = position.toString();
+                if (name.startsWith(builder.getRemainingLowerCase())&&ctx.getSource().getSender().hasPermission("permission.putplus." + ctx.getArgument("method",MethodEnum.class).toString() + "." + position)){
+                    builder.suggest(position.toString());
+                }
+            }
+            return builder.build();
+        });
     }
 
     /**
@@ -145,32 +187,13 @@ public final class PutPlus extends JavaPlugin implements Listener {
         }
 
         /**
-         * 获取建议列表的方法
-         *
-         * @param context 命令上下文
-         * @param builder 建议构建器
-         * @return 包含建议的CompletableFuture对象
-         */
-        @Override
-        public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, @NotNull SuggestionsBuilder builder) {
-            for (PositionEnum position : PositionEnum.values()) {
-                String name = position.toString();
-                if (name.startsWith(builder.getRemainingLowerCase())) {
-                    builder.suggest(position.toString());
-                }
-            }
-            return builder.buildFuture();
-        }
-
-        /**
          * 将原生类型字符串转换为位置枚举
          *
          * @param nativeType 原生类型字符串
          * @return 对应的位置枚举值
-         * @throws CommandSyntaxException 当转换失败时抛出异常
          */
         @Override
-        public @NotNull PositionEnum convert(@NotNull String nativeType) throws CommandSyntaxException {
+        public @NotNull PositionEnum convert(@NotNull String nativeType) {
             try {
                 return PositionEnum.valueOf(nativeType.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
@@ -198,32 +221,13 @@ public final class PutPlus extends JavaPlugin implements Listener {
         }
 
         /**
-         * 获取建议列表的方法
-         *
-         * @param context 命令上下文
-         * @param builder 建议构建器
-         * @return 包含建议的CompletableFuture对象
-         */
-        @Override
-        public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, @NotNull SuggestionsBuilder builder) {
-            for (MethodEnum method : MethodEnum.values()) {
-                String name = method.toString();
-                if (name.startsWith(builder.getRemainingLowerCase())) {
-                    builder.suggest(method.toString());
-                }
-            }
-            return builder.buildFuture();
-        }
-
-        /**
          * 将原生类型字符串转换为位置枚举
          *
          * @param nativeType 原生类型字符串
          * @return 对应的位置枚举值
-         * @throws CommandSyntaxException 当转换失败时抛出异常
          */
         @Override
-        public @NotNull MethodEnum convert(@NotNull String nativeType) throws CommandSyntaxException {
+        public @NotNull MethodEnum convert(@NotNull String nativeType) {
             try {
                 return MethodEnum.valueOf(nativeType.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
